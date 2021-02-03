@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+data:
+  POSTGRES_DB: metabase
+  POSTGRES_USER: admin
+  POSTGRES_PASSWORD: admin
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metabase-config
+data:
+  MB_DB_TYPE: postgres
+  MB_DB_DBNAME: metabase
+  MB_DB_PORT: "5432"
+  MB_DB_USER: admin
+  MB_DB_PASS: admin
+  MB_DB_HOST: database.default.svc.cluster.local

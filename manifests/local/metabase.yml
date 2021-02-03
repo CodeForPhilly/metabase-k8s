@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metabase
+  labels:
+    name: metabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: metabase
+  template:
+    metadata:
+      labels:
+        name: metabase
+    spec:
+      containers:
+      - name: metabase
+        image: metabase/metabase:latest
+        envFrom:
+        - configMapRef:
+            name: metabase-config
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          timeoutSeconds: 1
+          periodSeconds: 10
+          failureThreshold: 3
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: metabase
+spec:
+  selector:
+    name: metabase
+  ports:
+  - port: 3000
+    targetPort: 3000
+
+
+---
+
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: simple-ingress
+spec:
+  virtualhost:
+    fqdn: 127.0.0.1
+  routes:
+  - services:
+    - name: metabase
+      port: 3000
+    conditions:
+    - prefix: /
